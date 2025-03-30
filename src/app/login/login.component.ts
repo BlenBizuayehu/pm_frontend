@@ -28,7 +28,7 @@ export class LoginComponent {
 
     // Make the POST request to the backend
     this.http.post('http://localhost:8080/login', loginData, {
-      headers: { 'Content-Type': 'application/json' },  withCredentials: true
+      headers: { 'Content-Type': 'application/json' },  
     }).subscribe(
       (response: any) => {
         // Decode JWT token and store it in localStorage
@@ -51,7 +51,5 @@ export class LoginComponent {
         this.errorMessage = 'Invalid credentials' ;
       }
     );
-
-    
   }
 }

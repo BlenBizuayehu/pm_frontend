@@ -1,0 +1,20 @@
+<!-- Navbar (Top) -->
+<div class="navbar">
+    <div class="navbar-left">
+      <span class="logo">Admin Dashboard</span>
+    </div>
+    <div class="navbar-right">
+      <span class="user-info">
+        Welcome, Admin! <i class="fa fa-user"></i>
+      </span>
+      <!-- Navbar Navigation Links (Now in the navbar) -->
+      <nav class="navbar-links">
+        <a [routerLink]="['/admin-dashboard']"><i class="fa fa-tachometer"></i> Dashboard</a>
+        <a [routerLink]="['/users']"><i class="fa fa-users"></i> Users</a>
+        <a [routerLink]="['/projects']"><i class="fa fa-clipboard"></i> Projects</a>
+        <a [routerLink]="['/tasks']"><i class="fa fa-tasks"></i> Tasks</a>
+        <a [routerLink]="['/reports']"><i class="fa fa-bar-chart"></i> Reports</a>
+      </nav>
+    </div>
+  </div>
+  

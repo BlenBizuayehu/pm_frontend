@@ -1,0 +1,17 @@
+<div class="dashboard-container">
+<app-navbar></app-navbar>
+
+<div class="main-content">
+    <app-sidebar></app-sidebar>
+    
+    <div class="overview-cards">
+    <!-- Ensure you pass the inputs correctly -->
+    <app-overview-cards 
+        [totalUsers]="totalUsers" 
+        [totalProjects]="totalProjects" 
+        [totalTasks]="totalTasks" 
+        [activeUsers]="activeUsers">
+    </app-overview-cards>
+    </div>
+</div>
+</div>
