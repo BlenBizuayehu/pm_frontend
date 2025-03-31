@@ -20,4 +20,30 @@
   </tbody>
 </table>
 
-<button (click)="addProject()">+ Add Project</button>
+<!-- Add New Project Button to Show Form -->
+<button (click)="toggleAddProjectForm()">+ Add Project</button>
+
+<!-- Add Project Form -->
+<div *ngIf="showAddProjectForm">
+  <h3>Add New Project</h3>
+  <form (ngSubmit)="addProject()">
+    <label for="projectName">Project Name:</label>
+    <input
+      type="text"
+      id="projectName"
+      [(ngModel)]="newProject.name"
+      name="projectName"
+      required
+    />
+    <label for="projectStatus">Project Status:</label>
+    <input
+      type="text"
+      id="projectStatus"
+      [(ngModel)]="newProject.status"
+      name="projectStatus"
+      required
+    />
+    <button type="submit">Add Project</button>
+    <button type="button" (click)="toggleAddProjectForm()">Cancel</button>
+  </form>
+</div>

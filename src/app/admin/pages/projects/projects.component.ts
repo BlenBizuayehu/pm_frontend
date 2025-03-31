@@ -1,32 +1,70 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-projects',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [HttpClientModule, FormsModule],
   templateUrl: './projects.component.html',
-  styleUrls: ['./projects.component.css']
+  styleUrls: ['./projects.component.css'],
 })
 export class ProjectsComponent {
-  projects = [
-    { id: 1, name: 'Project A', status: 'Active', tasks: 5 },
-    { id: 2, name: 'Project B', status: 'Completed', tasks: 10 },
-    { id: 3, name: 'Project C', status: 'On Hold', tasks: 3 },
-  ];
+  private http = inject(HttpClient);
+
+  private apiUrl = 'http://localhost:8080/admin/projects';
+
+  projects = [];
+  newProject = { name: '', status: '' };  // Data structure for new project
+  showAddProjectForm = false;  // To toggle form visibility
 
   constructor() {}
 
-  // Method to delete a project
-  deleteProject(projectId: number) {
-    const projectIndex = this.projects.findIndex(project => project.id === projectId);
-    if (projectIndex !== -1) {
-      this.projects.splice(projectIndex, 1); 
-      console.log(`Project with id ${projectId} has been deleted`);
-    }
+  // Get all projects
+  getProjects() {
+    this.http.get<any>(this.apiUrl).subscribe(
+      (data) => {
+        this.projects = data;
+        console.log('Projects:', data);
+      },
+      (error) => {
+        console.error('Error fetching projects:', error);
+      }
+    );
   }
 
-  // Method to add a new project
+  // Add a new project
   addProject() {
-    console.log('Adding a new project');
-    // Implement logic to add a new project
+    const project = { name: this.newProject.name, status: this.newProject.status };
+
+    this.http.post<any>(this.apiUrl, project).subscribe(
+      (response) => {
+        console.log('Project added:', response);
+        this.getProjects(); // Refresh the project list after adding
+        this.showAddProjectForm = false; // Hide the form
+        this.newProject = { name: '', status: '' }; // Reset the form fields
+      },
+      (error) => {
+        console.error('Error adding project:', error);
+      }
+    );
+  }
+
+  // Delete a project
+  deleteProject(projectId: number) {
+    this.http.delete<any>(`${this.apiUrl}/${projectId}`).subscribe(
+      (response) => {
+        console.log('Project deleted:', response);
+        this.getProjects(); // Refresh the project list after deletion
+      },
+      (error) => {
+        console.error('Error deleting project:', error);
+      }
+    );
+  }
+
+  // Toggle the visibility of the add project form
+  toggleAddProjectForm() {
+    this.showAddProjectForm = !this.showAddProjectForm;
   }
 }

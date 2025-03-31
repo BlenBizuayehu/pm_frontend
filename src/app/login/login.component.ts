@@ -24,32 +24,27 @@ export class LoginComponent {
 
   // Method to handle login
   login() {
-    const loginData = { username: this.username, password: this.password };
-
-    // Make the POST request to the backend
+    const loginData = { full_name: this.username, password: this.password };
+    
     this.http.post('http://localhost:8080/login', loginData, {
-      headers: { 'Content-Type': 'application/json' },  
-    }).subscribe(
-      (response: any) => {
-        // Decode JWT token and store it in localStorage
+      headers: { 'Content-Type': 'application/json' },
+    }).subscribe({
+      next: (response: any) => {
         const decoded: any = jwt_decode(response.token);
         localStorage.setItem('token', response.token);
-
-        // Navigate based on the user's role
-        if (decoded.role === 'Admin') {
-          this.router.navigate(['/admin-dashboard']);
-        } else if (decoded.role === 'PM') {
-          this.router.navigate(['/pm-dashboard']);
-        } else if (decoded.role === 'Team') {
-          this.router.navigate(['/team-dashboard']);
-        } else {
-          this.errorMessage = 'Invalid role';
-        }
+        
+        // Role-based navigation
+        const roleRoutes: {[key: string]: string} = {
+          'Admin': '/admin-dashboard',
+          'PM': '/pm-dashboard',
+          'Team': '/team-dashboard'
+        };
+        
+        this.router.navigate([roleRoutes[decoded.role] || '/login']);
       },
-      (error) => {
-        // Handle error, e.g., invalid credentials
-        this.errorMessage = 'Invalid credentials' ;
+      error: (error) => {
+        console.error('Full error:', error);
+        this.errorMessage = error.error?.error || 'Login failed. Check console for details.';
       }
-    );
-  }
-}
+    });
+  }}
