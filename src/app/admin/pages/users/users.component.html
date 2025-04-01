@@ -1,22 +1,122 @@
-<h2>Manage Users</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Role</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let user of users">
-      <td>{{ user.name }}</td>
-      <td>{{ user.role }}</td>
-      <td>
-        <button (click)="editUser(user.id)">Edit</button>
-        <button (click)="deleteUser(user.id)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="container">
+  <h2>Users Management</h2>
+  
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
 
-<button (click)="addUser()">+ Add User</button>
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Add User Form -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4>Add New User</h4>
+    </div>
+    <div class="card-body">
+      <form (submit)="createUser()">
+        <div class="mb-3">
+          <label for="newUserName" class="form-label">Full Name</label>
+          <input type="text" class="form-control" id="newUserName" 
+                 [(ngModel)]="newUser.full_name" name="full_name" required>
+        </div>
+        <div class="mb-3">
+          <label for="newUserEmail" class="form-label">Email</label>
+          <input type="email" class="form-control" id="newUserEmail" 
+                 [(ngModel)]="newUser.email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="newUserPassword" class="form-label">Password</label>
+          <input type="password" class="form-control" id="newUserPassword" 
+                 [(ngModel)]="newUser.password" name="password" required>
+        </div>
+        <div class="mb-3">
+          <label for="newUserRole" class="form-label">Role</label>
+          <select class="form-select" id="newUserRole" 
+                  [(ngModel)]="newUser.role" name="role">
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add User</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card">
+    <div class="card-header">
+      <h4>User List</h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.id }}</td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-2" (click)="startEdit(user)">
+                Edit
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteUser(user.user_id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div *ngIf="editUserData" class="modal" style="display: block; background-color: rgba(0,0,0,0.5)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit User</h5>
+          <button type="button" class="btn-close" (click)="editUserData = null"></button>
+        </div>
+        <div class="modal-body">
+          <form (submit)="updateUser()">
+            <div class="mb-3">
+              <label for="editUserName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="editUserName" 
+                     [(ngModel)]="editUserData.full_name" name="full_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="editUserEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="editUserEmail" 
+                     [(ngModel)]="editUserData.email" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="editUserRole" class="form-label">Role</label>
+              <select class="form-select" id="editUserRole" 
+                      [(ngModel)]="editUserData.role" name="role">
+                <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="editUserData = null">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

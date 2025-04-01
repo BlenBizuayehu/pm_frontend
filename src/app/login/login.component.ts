@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import jwt_decode from 'jwt-decode';
 
 @Component({
   selector: 'app-login',
@@ -33,61 +32,51 @@ export class LoginComponent {
       password: this.password.trim() 
     };
 
-      const password = this.password.trim();
-      console.log('Sending password:', JSON.stringify(password)); // Shows exact characters
-      
-
-  
     console.log('Attempting login with:', loginData);
   
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-  
     this.http.post('http://localhost:8080/login', loginData, { 
-      headers,
-      observe: 'response' // This will give us full response access
+      withCredentials: true, // Essential for session cookies
+      observe: 'response'
     }).subscribe({
       next: (response: any) => {
-        console.log('Full response:', response);
+        console.log('Login successful:', response);
         
-        if (response.body?.token) {
-          try {
-            const decoded: any = jwt_decode(response.body.token);
-            console.log('Decoded token:', decoded);
-            
-            localStorage.setItem('token', response.body.token);
-            
-            const roleRoutes: {[key: string]: string} = {
-              'Admin': '/admin-dashboard',
-              'PM': '/pm-dashboard',
-              'Team': '/team-dashboard'
-            };
-            
-            const redirectRoute = roleRoutes[decoded.role] || '/default';
-            console.log('Navigating to:', redirectRoute);
-            this.router.navigate([redirectRoute]);
-          } catch (e) {
-            console.error('Token error:', e);
-            this.errorMessage = 'Invalid token received';
-          }
+        // Check if login was successful (adjust based on your API response)
+        if (response.status === 200) {
+          // Get user role from response or make another request if needed
+          this.getUserRoleAndRedirect();
         } else {
-          console.error('No token in response:', response);
-          this.errorMessage = 'Authentication failed (no token)';
+          this.errorMessage = 'Authentication failed';
         }
       },
       error: (error) => {
-        console.group('Login Error');
-        console.error('Full error:', error);
-        console.log('Status:', error.status);
-        console.log('Status Text:', error.statusText);
-        console.log('Error Message:', error.message);
-        console.log('Error Body:', error.error);
-        console.groupEnd();
-        
+        console.error('Login error:', error);
         this.errorMessage = error.error?.error || 
-                           error.statusText || 
-                           'Login failed. Please try again.';
+                          error.statusText || 
+                          'Login failed. Please try again.';
+      }
+    });
+  }
+
+  private getUserRoleAndRedirect() {
+    // Make request to get user info (since we're not using JWT)
+    this.http.get('http://localhost:8080/api/current-user', {
+      withCredentials: true
+    }).subscribe({
+      next: (user: any) => {
+        const roleRoutes: {[key: string]: string} = {
+          'Admin': '/admin-dashboard',
+          'PM': '/pm-dashboard',
+          'Team': '/team-dashboard'
+        };
+        
+        const redirectRoute = roleRoutes[user.role] || '/default';
+        console.log('Navigating to:', redirectRoute);
+        this.router.navigate([redirectRoute]);
+      },
+      error: (err) => {
+        console.error('Failed to get user role:', err);
+        this.errorMessage = 'Failed to determine user role';
       }
     });
   }
