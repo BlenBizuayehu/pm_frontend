@@ -1,0 +1,54 @@
+<div class="overview-cards-container">
+  <!-- Projects Card -->
+
+  
+  <div class="card">
+    <div class="card-icon">
+      <fa-icon [icon]="faProjectDiagram" class="card-icon"></fa-icon>
+    </div>
+    <div class="card-content">
+      <h4>Total Projects</h4>
+      <p class="value">{{ totalProjects }}</p>
+      <p class="subtext">{{ completedProjects }} completed</p>
+    </div>
+  </div>
+
+  
+  <!-- Tasks Card -->
+  <div class="card">
+    <div class="card-icon">
+      <fa-icon [icon]="faListCheck" class="card-icon"></fa-icon>
+    </div>
+    <div class="card-content">
+
+      <h4>Total Tasks</h4>
+      <p class="value">{{ pendingTasks + overdueTasks }}</p>
+      <p class="subtext">{{ overdueTasks }} overdue</p>
+    </div>
+  </div>
+  
+  <!-- Pending Tasks Card -->
+  <div class="card">
+    <div class="card-icon">
+      <fa-icon [icon]="faSpinner" class="card-icon" ></fa-icon>
+    </div>
+    <div class="card-content">
+
+      <h4>Pending</h4>
+      <p class="value">{{ pendingTasks }}</p>
+      <p class="subtext">Tasks in progress</p>
+    </div>
+  </div>
+
+  <!-- Overdue Tasks Card -->
+  <div class="card">
+    <div class="card-icon">
+      <fa-icon [icon]="faExclamationTriangle" class="card-icon"></fa-icon>
+    </div>
+    <div class="card-content">
+      <h4>Overdue</h4>
+      <p class="value">{{ overdueTasks }}</p>
+      <p class="subtext">Require attention</p>
+    </div>
+  </div>
+</div>

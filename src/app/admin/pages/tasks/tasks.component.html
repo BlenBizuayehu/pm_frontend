@@ -1,23 +1,280 @@
-<h2>Manage Tasks</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Task Name</th>
-      <th>Status</th>
-      <th>Project</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let task of tasks">
-      <td>{{ task.name }}</td>
-      <td>{{ task.status }}</td>
-      <td>{{ task.project }}</td>
-      <td>
-        <button (click)="deleteTask(task.id)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="tasks-management-container">
+  <!-- Header Section -->
+  <div class="tasks-header">
+    <div class="header-content">
+      <h2 class="page-title">
+        <fa-icon [icon]="faClipboardList" class="card-icon"></fa-icon>
+        Task Management
+      </h2>
+      <p class="page-subtitle">Manage and track all project tasks</p>
+    </div>
+    <div class="back-button-container">
+      <button class="btn-back" (click)="goBack()">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        Back to Dashboard
+      </button>
+    </div>
+  </div>
 
-<button (click)="addTask()">+ Add Task</button>
+  <!-- Stats Cards -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary">
+        <i class="fas fa-list-ol"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ totalTasks }}</h3>
+        <p>Total Tasks</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-success">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ completedTasksCount }}</h3>
+        <p>Completed</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-warning">
+        <i class="fas fa-spinner"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ inProgressTasksCount }}</h3>
+        <p>In Progress</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ overdueTasksCount }}</h3>
+        <p>Overdue</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <button class="btn btn-primary" (click)="showTaskForm = true; editTaskData = null">
+      <i class="fas fa-plus-circle"></i> Create New Task
+    </button>
+    
+  </div>
+
+  <!-- Create/Edit Task Form -->
+  <div class="card mb-4">
+    <div class="tasks-header">
+      <h3>{{ editTaskData ? 'Edit Task' : 'Create New Task' }}</h3>
+    </div>
+    <div class="card-body">
+      <form (submit)="editTaskData ? updateTask() : createTask()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Title*</label>
+            <input type="text" class="form-control" 
+                  [ngModel]="editTaskData?.title || newTask.title" 
+                  (ngModelChange)="editTaskData ? editTaskData.title = $event : newTask.title = $event"
+                  name="title" required>
+          </div>
+          
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Status*</label>
+            <select class="form-select" 
+                    [ngModel]="editTaskData?.status || newTask.status"
+                    (ngModelChange)="editTaskData ? editTaskData.status = $event : newTask.status = $event"
+                    name="status" required>
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Priority*</label>
+            <select class="form-select" 
+                    [ngModel]="editTaskData?.priority || newTask.priority"
+                    (ngModelChange)="editTaskData ? editTaskData.priority = $event : newTask.priority = $event"
+                    name="priority" required>
+              <option *ngFor="let priority of priorities" [value]="priority">
+                {{ priority }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" rows="3"
+                    [ngModel]="editTaskData?.description || newTask.description"
+                    (ngModelChange)="editTaskData ? editTaskData.description = $event : newTask.description = $event"
+                    name="description"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Deadline</label>
+            <input type="date" class="form-control"
+                  [ngModel]="editTaskData?.deadline || newTask.deadline"
+                  (ngModelChange)="editTaskData ? editTaskData.deadline = $event : newTask.deadline = $event"
+                  name="deadline">
+          </div>
+          
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Project</label>
+            <select class="form-select"
+                    [ngModel]="editTaskData?.project_id || newTask.project_id"
+                    (ngModelChange)="editTaskData ? editTaskData.project_id = $event : newTask.project_id = $event"
+                    name="project_id">
+              <option [value]="null">-- Select Project --</option>
+              <option *ngFor="let project of projects" [value]="project.project_id">
+                {{ project.name }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Assigned To</label>
+            <select class="form-select"
+                    [ngModel]="editTaskData?.assigned_to || newTask.assigned_to"
+                    (ngModelChange)="editTaskData ? editTaskData.assigned_to = $event : newTask.assigned_to = $event"
+                    name="assigned_to">
+              <option [value]="null">-- Select Assignee --</option>
+              <option *ngFor="let user of users" [value]="user.user_id">
+                {{ user.full_name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button *ngIf="editTaskData" type="button" class="btn btn-secondary me-2" 
+                  (click)="cancelEdit()" [disabled]="isLoading">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            {{ editTaskData ? 'Update Task' : 'Create Task' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Tasks Table -->
+  <div class="card table-card">
+    <div class="card-header">
+      <i class="fas fa-list-ul"></i> Task List
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <div *ngIf="!isLoading && tasks.length === 0" class="alert alert-info">
+          No tasks found. Create your first task!
+        </div>
+      
+        <div *ngIf="!isLoading && tasks.length > 0" class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Project</th>
+                <th>Assigned To</th>
+                <th>Deadline</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let task of tasks" (click)="viewTaskDetails(task)" style="cursor: pointer;">
+                <td>{{ task.title }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-secondary': task.status === 'To Do',
+                    'bg-primary': task.status === 'In Progress',
+                    'bg-success': task.status === 'Done',
+                    'bg-danger': task.status === 'Blocked'
+                  }">
+                    {{ task.status }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" >
+                    {{ task.priority }}
+                  </span>
+                </td>
+                <td>{{ getProjectName(task.project_id) }}</td>
+                <td>{{ getUserName(task.assigned_to) }}</td>
+                <td>{{ formatDate(task.deadline) }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="startEdit(task); $event.stopPropagation()">
+                    Edit
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteTask(task.task_id); $event.stopPropagation()">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+  <!-- Task Details Modal -->
+  <div class="modal" [class.show]="selectedTask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <i class="fas fa-tasks"></i> Task Details
+        </h3>
+        <button class="close-btn" (click)="selectedTask = null">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 class="task-title">{{ selectedTask?.title }}</h4>
+        
+        <div class="task-meta">
+          <div class="meta-item">
+            <span class="meta-label"><i class="fas fa-clipboard-check"></i> Status:</span>
+            <span class="status-badge" [ngClass]="'status-' + selectedTask?.status.toLowerCase().replace(' ', '-')">
+              {{ selectedTask?.status }}
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label"><i class="fas fa-flag"></i> Priority:</span>
+            <span class="priority-badge" [ngClass]="'priority-' + selectedTask?.priority.toLowerCase()">
+              {{ selectedTask?.priority }}
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label"><i class="fas fa-project-diagram"></i> Project:</span>
+            <span>{{ getProjectName(selectedTask?.project_id) || 'Unassigned' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label"><i class="fas fa-user-tag"></i> Assigned To:</span>
+            <span>{{ getUserName(selectedTask?.assigned_to) || 'Unassigned' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label"><i class="fas fa-calendar-day"></i> Deadline:</span>
+            <span [class.text-danger]="isOverdue(selectedTask?.deadline)">
+              {{ formatDate(selectedTask?.deadline) || 'Not set' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="task-description">
+          <h5><i class="fas fa-align-left"></i> Description</h5>
+          <p>{{ selectedTask?.description || 'No description provided' }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-edit" (click)="startEdit(selectedTask); selectedTask = null">
+          <i class="fas fa-edit"></i> Edit Task
+        </button>
+        <button class="btn btn-cancel" (click)="selectedTask = null">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

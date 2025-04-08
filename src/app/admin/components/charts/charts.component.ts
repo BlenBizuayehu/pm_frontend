@@ -1,38 +1,102 @@
-// charts.component.ts
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { Chart, registerables } from 'chart.js';
 
-import { Component } from '@angular/core';
-import { Chart } from 'chart.js';
+interface StatusData {
+  [key: string]: number;
+}
 
 @Component({
   selector: 'app-charts',
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.css']
 })
-export class ChartsComponent {
-  ngOnInit() {
-    this.createChart();
+export class ChartsComponent implements OnInit {
+  projectChart: any;
+  taskChart: any;
+  isLoading = true;
+  errorMessage = '';
+  
+  totalProjects: number = 0;
+  totalTasks: number = 0;
+  completionRate: number = 0;
+
+  constructor(private http: HttpClient) {
+    Chart.register(...registerables);
   }
 
-  createChart() {
-    const ctx = document.getElementById('chart') as HTMLCanvasElement;
-    new Chart(ctx, {
-      type: 'bar', // or 'pie', 'line', etc.
-      data: {
-        labels: ['Project 1', 'Project 2', 'Project 3'], // example labels
-        datasets: [{
-          label: 'Tasks Completed',
-          data: [20, 35, 45], // example data
-          backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(75, 192, 192, 0.2)'],
-          borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'],
-          borderWidth: 1
-        }]
+  ngOnInit() {
+    this.loadDashboardData();
+  }
+
+  loadDashboardData() {
+    this.http.get<StatusData>('http://localhost:8080/api/project-status').subscribe({
+      next: (projectData) => {
+        this.createProjectChart(projectData);
+        this.totalProjects = this.calculateTotal(projectData);
+        this.checkLoadingComplete();
       },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
+      error: (err) => {
+        this.errorMessage = 'Failed to load project data';
+        this.isLoading = false;
+      }
+    });
+
+    this.http.get<StatusData>('http://localhost:8080/api/task-status').subscribe({
+      next: (taskData) => {
+        this.createTaskChart(taskData);
+        this.totalTasks = this.calculateTotal(taskData);
+        this.completionRate = this.calculateCompletionRate(taskData);
+        this.checkLoadingComplete();
+      },
+      error: (err) => {
+        this.errorMessage = 'Failed to load task data';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private calculateTotal(data: StatusData): number {
+    return Object.values(data).reduce((sum: number, count: number) => sum + count, 0);
+  }
+
+  private calculateCompletionRate(taskData: StatusData): number {
+    const total = this.calculateTotal(taskData);
+    const completed = taskData['Done'] || 0;
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  }
+
+  private checkLoadingComplete() {
+    if (this.projectChart && this.taskChart) {
+      this.isLoading = false;
+    }
+  }
+
+  private createProjectChart(data: StatusData) {
+    const ctx = document.getElementById('projectChart') as HTMLCanvasElement;
+    this.projectChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          data: Object.values(data),
+          backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+        }]
+      }
+    });
+  }
+
+  private createTaskChart(data: StatusData) {
+    const ctx = document.getElementById('taskChart') as HTMLCanvasElement;
+    this.taskChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          label: 'Tasks',
+          data: Object.values(data),
+          backgroundColor: '#36b9cc'
+        }]
       }
     });
   }

@@ -1,6 +1,78 @@
-<!-- charts.component.html -->
-
-<div class="chart-container">
-    <canvas id="chart"></canvas>
-  </div>
+<div class="container mt-4">
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading dashboard data...</p>
+    </div>
   
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Charts Section -->
+    <div *ngIf="!isLoading" class="row">
+      <!-- Project Status Chart -->
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-body">
+            <canvas id="projectChart"></canvas>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Task Status Chart -->
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-body">
+            <canvas id="taskChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Stats Cards -->
+    <div *ngIf="!isLoading" class="row">
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+              Total Projects</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              {{ totalProjects }}
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+              Total Tasks</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              {{ totalTasks }}
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+              Completion Rate</div>
+            <div class="row no-gutters align-items-center">
+              <div class="col-auto">
+                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                  {{ completionRate }}%
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

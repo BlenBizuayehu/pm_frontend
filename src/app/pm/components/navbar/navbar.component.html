@@ -1,0 +1,22 @@
+<div class="navbar">
+    
+    <div class="navbar-right">
+      <span class="user-info">
+        Welcome <i class="fa fa-user"></i>
+      </span>
+
+      <nav class="navbar-links">
+        <a [routerLink]="['/pm-dashboard']"><i class="fa fa-tachometer"></i> Dashboard</a>
+        <a [routerLink]="['/projects']"><i class="fa fa-project-diagram"></i> Projects</a>
+        <a [routerLink]="['/tasks']"><i class="fa fa-tasks"></i> Tasks</a>
+        <a [routerLink]="['/teams']"><i class="fa fa-teams"></i> Teams</a>
+
+      </nav>
+      <div class="back-button-container">
+        <button class="btn-back" (click)="goBack()">
+          <fa-icon [icon]="faArrowLeft"></fa-icon>
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>

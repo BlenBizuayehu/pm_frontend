@@ -1,0 +1,50 @@
+<div class="dashboard-container">
+    <!-- Hamburger Menu Button -->
+  
+  
+    <app-navbar></app-navbar>
+  
+    <div class="main-content">
+      <!-- Main Content Area -->
+      <div class="content-area">
+        <div class="overview-cards">
+          <!-- Replace your existing overview-cards usage with this -->
+<app-overview-cards
+[totalTasks]="assignedTasksCount"
+[todoTasks]="todoTasksCount"
+[inProgressTasks]="inProgressTasksCount"
+[completedTasks]="completedTasksCount"
+[overdueTasks]="overdueTasksCount"
+[completionRate]="getCompletionPercentage()"
+>
+</app-overview-cards>
+        </div>
+        
+        <div class="team-content-sections">
+          <!-- Task Progress Widget -->
+          <div class="task-progress-card">
+            <h3>My Task Progress</h3>
+            <div class="progress-wrapper">
+              <div class="progress-bar" 
+                   [style.width.%]="getCompletionPercentage()">
+                <span>{{ getCompletionPercentage() }}%</span>
+              </div>
+            </div>
+            
+          <!-- Action Cards -->
+          <div class="chart-section">
+            <h3>Task Status Distribution</h3>
+            <app-task-status-chart 
+              [taskData]="{
+                todo: todoTasksCount,
+                inProgress: inProgressTasksCount,
+                completed: completedTasksCount,
+                overdue: overdueTasksCount
+              }">
+            </app-task-status-chart>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>

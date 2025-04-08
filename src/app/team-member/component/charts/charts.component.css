@@ -1,0 +1,20 @@
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+  
+  .chart-type-selector {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  .chart-type-selector button {
+    margin: 0 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }

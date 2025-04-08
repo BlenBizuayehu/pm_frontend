@@ -1,0 +1,43 @@
+<div class="overview-cards-container">
+    <!-- Total Tasks Card -->
+    <div class="overview-card total-tasks-card">
+      <fa-icon [icon]="faListCheck" class="card-icon"></fa-icon>
+      <span class="card-value" >{{ totalTasks }}</span>
+      <span class="card-label">Total Tasks</span>
+    </div>
+    
+    <!-- To Do Card -->
+    <div class="overview-card todo-tasks-card">
+      <fa-icon [icon]="faClipboardList" class="card-icon"></fa-icon>
+      <span class="card-value">{{ todoTasks }}</span>
+      <span class="card-label">To Do</span>
+    </div>
+    
+    <!-- In Progress Card -->
+    <div class="overview-card inprogress-tasks-card">
+      <fa-icon [icon]="faSpinner" class="card-icon" ></fa-icon>
+      <span class="card-value">{{ inProgressTasks }}</span>
+      <span class="card-label">In Progress</span>
+    </div>
+  
+    <!-- Completed Card -->
+    <div class="overview-card completed-tasks-card">
+      <fa-icon [icon]="faCheckCircle" class="card-icon"></fa-icon>
+      <span class="card-value">{{ completedTasks }}</span>
+      <span class="card-label">Completed</span>
+    </div>
+  
+    <!-- Overdue Card -->
+    <div class="overview-card overdue-tasks-card">
+      <fa-icon [icon]="faExclamationTriangle" class="card-icon"></fa-icon>
+      <span class="card-value">{{ overdueTasks }}</span>
+      <span class="card-label">Overdue</span>
+    </div>
+  
+    <!-- Completion Rate Card -->
+    <div class="overview-card completion-rate-card">
+      <fa-icon [icon]="faChartLine" class="card-icon"></fa-icon>
+      <span class="card-value">{{ completionRate }}%</span>
+      <span class="card-label">Completion Rate</span>
+    </div>
+  </div>

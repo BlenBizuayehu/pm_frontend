@@ -1,0 +1,156 @@
+<div></div>
+<div class="container mt-4">
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Header and Create Team Button -->
+    <div class="management-header" >
+      <div>
+        <h2 class="page-title">
+          <fa-icon [icon]="faPeopleGroup" class="card-icon" ></fa-icon>
+          Teams Management
+        </h2>
+        <p class="page-subtitle">Manage all system users and permissions</p>
+  
+      </div>
+      
+      <div class="back-button-container">
+        <button class="btn-back" (click)="goBack()">
+          <fa-icon [icon]="faArrowLeft"></fa-icon>
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+    
+
+    
+    <button class="btn btn-primary" (click)="showCreateForm = true" *ngIf="!showCreateForm">
+      Create New Team
+    </button>
+<div *ngIf="showCreateForm" class="card mb-4">
+  <div class="card-header">{{ isEditMode ? 'Edit Team' : 'Create New Team' }}</div>
+  <div class="card-body">
+    <form (submit)="isEditMode ? updateTeam() : createTeam()">
+      <div class="mb-3">
+        <label for="teamName" class="form-label">Team Name</label>
+        <input type="text" class="form-control" id="teamName" 
+               [(ngModel)]="(isEditMode ? editTeamData : newTeam).name" 
+               name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="teamProject" class="form-label">Project</label>
+        <select class="form-select" id="teamProject" 
+                [(ngModel)]="(isEditMode ? editTeamData : newTeam).project_id" 
+                name="project_id">
+          <option [ngValue]="null">No project assigned</option>
+          <option *ngFor="let project of projects" [ngValue]="project.project_id">
+            {{ project.name }}
+          </option>
+        </select>
+      </div>
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          {{ isLoading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Team' : 'Create Team') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+  
+    <!-- Teams Table -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Team Name</th>
+            <th>Project</th>
+            <th>Members</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let team of teams">
+            <td>{{ team.name }}</td>
+            <td>{{ getProjectName(team.project_id) }}</td>
+            <td>
+              <div *ngIf="team.members.length > 0; else noMembers">
+                <div *ngFor="let member of team.members" class="d-flex justify-content-between align-items-center mb-1">
+                  <span>
+                    {{ getUserName(member.id ) }} ({{ member.role }})
+                  </span>
+                  <button class="btn btn-sm btn-outline-danger" 
+            (click)="removeMember(team,member.id)">
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <ng-template #noMembers>
+                <span class="text-muted">No members</span>
+              </ng-template>
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        (click)="openAddMemberModal(addMemberModal, team)">
+                  Add Member
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" 
+        (click)="startEdit(team)">
+  Edit
+</button>
+                <button class="btn btn-sm btn-outline-danger" 
+                        (click)="deleteTeam(team.team_id)">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="teams.length === 0">
+            <td colspan="4" class="text-center py-3">No teams found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Add Member Modal -->
+    <ng-template #addMemberModal let-modal>
+      <div class="modal-header">
+        <h5 class="modal-title">Add Member to {{ selectedTeamForMembers?.name }}</h5>
+        <button type="button" class="btn-close" (click)="modal.dismiss()">X</button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Select User</label>
+            <select class="form-select" [(ngModel)]="newMember.user_id" name="user_id">
+              <option [ngValue]="null">Select a user...</option>
+              <option *ngFor="let user of availableUsers" [ngValue]="user.user_id">
+                {{ user.full_name }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select class="form-select" [(ngModel)]="newMember.role" name="role">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+        <button type="button" class="btn btn-primary" 
+                (click)="addMember()" [disabled]="!newMember.user_id || isLoading">
+          {{ isLoading ? 'Adding...' : 'Add Member' }}
+        </button>
+      </div>
+    </ng-template>
+  </div>

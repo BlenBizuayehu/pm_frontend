@@ -1,121 +1,173 @@
-<div class="container">
-  <h2>Users Management</h2>
-  
-  <!-- Error Message -->
+<div class="users-management-container">
+  <!-- Header Section -->
+  <div class="management-header">
+    <div class="header-content">
+      <h2 class="page-title">
+        <fa-icon [icon]="faUsers" class="card-icon"></fa-icon>
+        User Management
+      </h2>
+      <p class="page-subtitle">Manage all system users and permissions</p>
+    </div>
+    <button class="btn-back" (click)="goBack()">
+      <fa-icon [icon]="faArrowLeft"></fa-icon> Back to Dashboard
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
   <div *ngIf="errorMessage" class="alert alert-danger">
     {{ errorMessage }}
   </div>
 
-  <!-- Loading Indicator -->
-  <div *ngIf="isLoading" class="text-center">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+  
+
+  <!-- Stats Cards -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary">
+        <i class="fas fa-user-friends"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ totalUsers }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-success">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ adminCount }}</h3>
+        <p>Administrators</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-info">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ managerCount }}</h3>
+        <p>Managers</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-warning">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ memberCount }}</h3>
+        <p>Team Members</p>
+      </div>
     </div>
   </div>
 
-  <!-- Add User Form -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h4>Add New User</h4>
-    </div>
-    <div class="card-body">
-      <form (submit)="createUser()">
-        <div class="mb-3">
-          <label for="newUserName" class="form-label">Full Name</label>
-          <input type="text" class="form-control" id="newUserName" 
-                 [(ngModel)]="newUser.full_name" name="full_name" required>
-        </div>
-        <div class="mb-3">
-          <label for="newUserEmail" class="form-label">Email</label>
-          <input type="email" class="form-control" id="newUserEmail" 
-                 [(ngModel)]="newUser.email" name="email" required>
-        </div>
-        <div class="mb-3">
-          <label for="newUserPassword" class="form-label">Password</label>
-          <input type="password" class="form-control" id="newUserPassword" 
-                 [(ngModel)]="newUser.password" name="password" required>
-        </div>
-        <div class="mb-3">
-          <label for="newUserRole" class="form-label">Role</label>
-          <select class="form-select" id="newUserRole" 
-                  [(ngModel)]="newUser.role" name="role">
-            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Add User</button>
-      </form>
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <button class="btn btn-primary" (click)="openAddUserModal()">
+      <i class="fas fa-user-plus"></i> Add New User
+    </button>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search users..." [(ngModel)]="searchQuery" (input)="filterUsers()">
     </div>
   </div>
 
   <!-- Users Table -->
-  <div class="card">
+  <div class="card table-card">
     <div class="card-header">
-      <h4>User List</h4>
+      <i class="fas fa-list"></i> User Directory
     </div>
     <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users">
-            <td>{{ user.id }}</td>
-            <td>{{ user.full_name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <button class="btn btn-sm btn-warning me-2" (click)="startEdit(user)">
-                Edit
-              </button>
-              <button class="btn btn-sm btn-danger" (click)="deleteUser(user.user_id)">
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-id-card"></i> ID</th>
+              <th><i class="fas fa-user"></i> Name</th>
+              <th><i class="fas fa-envelope"></i> Email</th>
+              <th><i class="fas fa-user-tag"></i> Role</th>
+              <th><i class="fas fa-calendar-alt"></i> Joined</th>
+              <th><i class="fas fa-cog"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers">
+              <td>{{ user.user_id }}</td>
+              <td>
+                <div class="user-avatar">
+                  {{ user.full_name }}
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="role-badge" [ngClass]="'role-' + user.role.toLowerCase()">
+                  <i [class]="getRoleIcon(user.role)"></i> {{ user.role }}
+                </span>
+              </td>
+              <td>{{ user.created_at | date:'mediumDate' }}</td>
+              <td class="action-buttons">
+                <button class="btn btn-sm btn-edit" (click)="editUser(user)">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-delete" (click)="confirmDelete(user)">
+                  <i class="fas fa-trash-alt"></i> Delete
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="6" class="no-results">
+                <i class="fas fa-exclamation-circle"></i> No users found matching your criteria
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Edit User Modal -->
-  <div *ngIf="editUserData" class="modal" style="display: block; background-color: rgba(0,0,0,0.5)">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit User</h5>
-          <button type="button" class="btn-close" (click)="editUserData = null"></button>
-        </div>
-        <div class="modal-body">
-          <form (submit)="updateUser()">
-            <div class="mb-3">
-              <label for="editUserName" class="form-label">Full Name</label>
-              <input type="text" class="form-control" id="editUserName" 
-                     [(ngModel)]="editUserData.full_name" name="full_name" required>
-            </div>
-            <div class="mb-3">
-              <label for="editUserEmail" class="form-label">Email</label>
-              <input type="email" class="form-control" id="editUserEmail" 
-                     [(ngModel)]="editUserData.email" name="email" required>
-            </div>
-            <div class="mb-3">
-              <label for="editUserRole" class="form-label">Role</label>
-              <select class="form-select" id="editUserRole" 
-                      [(ngModel)]="editUserData.role" name="role">
-                <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-              </select>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="editUserData = null">Cancel</button>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-          </form>
-        </div>
+  <!-- Add/Edit User Modal -->
+  <div class="modal" [class.show]="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <i class="fas" [class.fa-user-edit]="editingUser" [class.fa-user-plus]="!editingUser"></i>
+          {{ editingUser ? 'Edit User' : 'Add New User' }}
+        </h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (submit)="submitUserForm()">
+          <div class="form-group">
+            <label><i class="fas fa-signature"></i> Full Name</label>
+            <input type="text" [(ngModel)]="currentUser.full_name" name="full_name" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" [(ngModel)]="currentUser.email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" [(ngModel)]="currentUser.password" name="password" [required]="!editingUser">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user-tag"></i> Role</label>
+            <select [(ngModel)]="currentUser.role" name="role">
+              <option *ngFor="let role of roles" [value]="role">
+                <i [class]="getRoleIcon(role)"></i> {{ role }}
+              </option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-cancel" (click)="closeModal()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-submit">
+              <i class="fas fa-save"></i> {{ editingUser ? 'Update' : 'Create' }} User
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

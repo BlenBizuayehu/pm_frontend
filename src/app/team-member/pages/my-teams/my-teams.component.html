@@ -1,0 +1,79 @@
+<div class="my-teams-container">
+    <div class="header-section">
+      <h1><fa-icon [icon]="faUserFriends"></fa-icon> My Teams</h1>
+      <div class="back-button-container">
+        <button class="btn-back" (click)="goBack()">
+          <fa-icon [icon]="faArrowLeft"></fa-icon>
+          Back
+        </button>
+      </div>
+    </div>
+  
+    <div class="teams-grid">
+      <div *ngFor="let team of teams" class="team-card">
+        <!-- First Section: Team Name and Status -->
+        <div class="team-header">
+          <h2>{{ team.name }}</h2>
+          
+        </div>
+        
+        <!-- Second Section: Key Info -->
+        <div class="team-key-info">
+          <!-- <div class="info-item">
+            <fa-icon [icon]="faCrown"></fa-icon>
+            <span>Leader: {{ team.leaderName }}</span>
+          </div>
+          <div class="info-item">
+            <fa-icon [icon]="faProjectDiagram"></fa-icon>
+            <span>Project: {{ team.project }}</span>
+          </div> -->
+          <div class="info-item">
+            <fa-icon [icon]="getRoleIcon(team.role)"></fa-icon>
+            <span>Your Role: {{ team.role }}</span>
+          </div>
+        </div>
+        
+        <!-- Third Section: Actions -->
+        <div class="team-actions">
+          <button class="btn-view" (click)="viewTeamDetails(team)">
+            View Team <fa-icon [icon]="faChevronRight"></fa-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Team Details Modal -->
+    <div *ngIf="selectedTeam" class="team-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>{{ selectedTeam.name }}</h2>
+          <button class="close-btn" (click)="closeTeamDetails()">
+            <fa-icon [icon]="faTimes"></fa-icon>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Team Overview -->
+          <div class="team-overview">
+            
+          </div>
+          
+          <div class="team-members-section">
+            <h3><fa-icon [icon]="faUsers"></fa-icon> Team Members</h3>
+            <div class="members-list">
+              <div *ngFor="let member of selectedTeam.members" class="member-card">
+                <div class="member-info">
+                  <fa-icon [icon]="getRoleIcon(member.role)"></fa-icon>
+                  <div class="member-details">
+                    <span class="member-name">{{member.name}}</span>
+                    <span class="member-role">{{member.role}}</span>
+                  </div>
+                </div>
+                <div class="member-contact">
+                  <a *ngIf="member.email" href="mailto:{{member.email}}">
+                    <fa-icon [icon]="faEnvelope"></fa-icon>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>

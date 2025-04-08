@@ -1,0 +1,303 @@
+.my-tasks-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .btn-view {
+    background-color: #f8f9fa;
+    color: #3498db;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-view:hover {
+    background-color: #e9f5fe;
+    border-color: #3498db;
+  }
+  .header-section h1 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+  }
+  
+  .tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .task-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .task-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+  }
+  
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .task-header h2 {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin: 0;
+  }
+  
+  .task-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .status-todo {
+    background-color: #e2e3e5;
+    color: #383d41;
+  }
+  
+  .status-in-progress {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  
+  .status-done {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .status-blocked {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .task-details {
+    margin-bottom: 1.5rem;
+  }
+  
+  .detail-item, .task-desc {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    color: #555;
+  }
+
+
+  
+  .task-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .btn-edit{
+    color:#60a3cf;
+  }
+  /* Loading, error, and empty states */
+  .loading-state {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .error-message {
+    background: #ffecec;
+    border-left: 4px solid #ff5252;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #ff5252;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .header-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .tasks-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Status Editing */
+.status-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.btn-edit, .btn-save, .btn-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.btn-save {
+  color: #28a745;
+}
+
+.btn-cancel {
+  color: #dc3545;
+}
+
+/* Task Modal */
+.task-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.detail-row {
+  margin-bottom: 15px;
+}
+
+.detail-label {
+  font-weight: bold;
+  display: inline-block;
+  min-width: 100px;
+}
+
+.detail-value {
+  display: inline-block;
+}
+
+/* ===== BACK BUTTON STYLES ===== */
+.back-button-container {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+  }
+  
+  .btn-back {
+    background-color: #f8f9fa;
+    color: #3498db;
+    border: 1px solid #ddd;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  .btn-back:hover {
+    background-color: #e9f5fe;
+    border-color: #3498db;
+    transform: translateX(-4px); /* Animate left slightly */
+  }
+  
+  /* Update header section to accommodate back button */
+  .header-section {
+    position: relative; /* For absolute positioning of back button */
+    padding-right: 120px; /* Space for back button */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .back-button-container {
+      position: static;
+      margin-bottom: 1rem;
+    }
+    
+    .header-section {
+      padding-right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .btn-back {
+      align-self: flex-end;
+      margin-top: 1rem;
+    }
+  }

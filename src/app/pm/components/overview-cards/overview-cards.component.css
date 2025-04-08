@@ -1,0 +1,110 @@
+/* Overview Cards Container */
+.overview-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  /* Card Styles */
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border-top: 4px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Card Icon */
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #3498db; /* Default blue color */
+  }
+  
+  /* Card Content */
+  .card-content h4 {
+    font-size: 1rem;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .card-content .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+    display: block;
+  }
+  
+  .card-content .subtext {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin: 0;
+  }
+  
+  /* Color Variants for Each Card Type */
+  .card:nth-child(1) { /* Projects */
+    border-top-color: #3498db;
+  }
+  .card:nth-child(1) .card-icon {
+    color: #3498db;
+  }
+  
+  .card:nth-child(2) { /* Total Tasks */
+    border-top-color: #9b59b6;
+  }
+  .card:nth-child(2) .card-icon {
+    color: #9b59b6;
+  }
+  
+  .card:nth-child(3) { /* Pending Tasks */
+    border-top-color: #f39c12;
+  }
+  .card:nth-child(3) .card-icon {
+    color: #f39c12;
+  }
+  
+  .card:nth-child(4) { /* Overdue Tasks */
+    border-top-color: #e74c3c;
+  }
+  .card:nth-child(4) .card-icon {
+    color: #e74c3c;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .overview-cards-container {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    
+    .card {
+      padding: 1.2rem;
+    }
+    
+    .card-content .value {
+      font-size: 1.7rem;
+    }
+    
+    .card-icon {
+      font-size: 1.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .overview-cards-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  }

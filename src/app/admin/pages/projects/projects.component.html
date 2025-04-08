@@ -1,49 +1,300 @@
-<h2>Manage Projects</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Project Name</th>
-      <th>Status</th>
-      <th>Number of Tasks</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let project of projects">
-      <td>{{ project.name }}</td>
-      <td>{{ project.status }}</td>
-      <td>{{ project.tasks }}</td>
-      <td>
-        <button (click)="deleteProject(project.id)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="container mt-4">
+  <div class="projects-header">
+    <div>
 
-<!-- Add New Project Button to Show Form -->
-<button (click)="toggleAddProjectForm()">+ Add Project</button>
+      <h2 class="page-title">
+        <fa-icon [icon]="faProjectDiagram" class="card-icon"></fa-icon>
 
-<!-- Add Project Form -->
-<div *ngIf="showAddProjectForm">
-  <h3>Add New Project</h3>
-  <form (ngSubmit)="addProject()">
-    <label for="projectName">Project Name:</label>
-    <input
-      type="text"
-      id="projectName"
-      [(ngModel)]="newProject.name"
-      name="projectName"
-      required
-    />
-    <label for="projectStatus">Project Status:</label>
-    <input
-      type="text"
-      id="projectStatus"
-      [(ngModel)]="newProject.status"
-      name="projectStatus"
-      required
-    />
-    <button type="submit">Add Project</button>
-    <button type="button" (click)="toggleAddProjectForm()">Cancel</button>
-  </form>
+        Projects Dashboard</h2>
+
+      <p class="page-subtitle">Manage and track all projects</p>    
+    </div>
+
+  <div class="back-button-container">
+    <button class="btn-back" (click)="goBack()">
+      <fa-icon [icon]="faArrowLeft"></fa-icon>
+      Back to Dashboard
+    </button>
+  </div>
+  </div>
+  
+
+   <!-- Success/Error Messages -->
+   <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Projects List -->
+  <div *ngIf="!isLoading" class="row">
+    <!-- Projects Table -->
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3>All Projects</h3>
+          
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Deadline</th>
+                  <th>Project Manager</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let project of projects">
+                  <td>{{ project.name }}</td>
+                  <td>
+                    <span class="badge" 
+                          [class.bg-success]="project.status === 'Active'"
+                          [class.bg-warning]="project.status === 'On Hold'"
+                          [class.bg-secondary]="project.status === 'Completed'">
+                      {{ project.status }}
+                    </span>
+                  </td>
+                  <td>{{ project.deadline | date:'shortDate' }}</td>
+                  <td>{{ getPmName(project.pm_id) }}</td>
+                  <td class="text-end">
+                    <!-- <button class="btn btn-primary" (click)="openModal(openAddTaskModal)">Add Task</button> -->
+                    <button class="btn btn-sm btn-outline-primary me-2"
+                            (click)="viewProjectDetails(project)">
+                      Details
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary me-2"
+                            (click)="startEdit(project)">
+                      Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            (click)="deleteProject(project.project_id)">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Details Panel -->
+    <div class="col-md-4">
+      <div class="card sticky-top" style="top: 20px;">
+        <div class="card-header">
+          <h3>Project Details</h3>
+        </div>
+        <div class="card-body" *ngIf="selectedProject; else noProjectSelected">
+          <h4>{{ selectedProject.name }}</h4>
+          <p class="text-muted">{{ selectedProject.description }}</p>
+          
+          <div class="mb-3">
+            <strong>Status:</strong>
+            <span class="badge ms-2"
+                  [class.bg-success]="selectedProject.status === 'Active'"
+                  [class.bg-warning]="selectedProject.status === 'On Hold'"
+                  [class.bg-secondary]="selectedProject.status === 'Completed'">
+              {{ selectedProject.status }}
+            </span>
+          </div>
+
+          <div class="mb-3">
+            <strong>Project Manager:</strong>
+            <span>{{ getPmName(selectedProject.pm_id) }}</span>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <strong>Deadline:</strong>
+              <span>{{ selectedProject.deadline | date:'yyyy-MM-dd' }}</span>            </div>
+          </div>
+        </div>
+
+        <ng-template #noProjectSelected>
+          <div class="card-body text-center text-muted">
+            <i class="bi bi-info-circle" style="font-size: 2rem;"></i>
+            <p class="mt-2">Select a project to view details</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && projects.length === 0" class="alert alert-info">
+    No projects found in the system.
+  </div>
+
+  <div class="card mt-4" *ngIf="selectedProject">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4>Tasks for {{ selectedProject.name }}</h4>
+      <button class="btn btn-sm btn-primary" 
+        (click)="navigateToTasks()">
+        Add Task
+      </button>
+    </div>
+    <div class="card-body">
+      <div *ngIf="isLoading" class="text-center py-3">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+  
+      <div class="table-responsive" *ngIf="tasks.length > 0 && !isLoading">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Due Date</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of tasks">
+              <td>{{ task.title }}</td>
+              <td>
+                <span class="badge" 
+                      [class.bg-secondary]="task.status === 'Not Started'"
+                      [class.bg-warning]="task.status === 'In Progress'"
+                      [class.bg-success]="task.status === 'Completed'">
+                  {{ task.status }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" 
+                      [class.bg-info]="task.priority === 'Low'"
+                      [class.bg-primary]="task.priority === 'Medium'"
+                      [class.bg-danger]="task.priority === 'High'">
+                  {{ task.priority }}
+                </span>
+              </td>
+              <td>
+                {{ task.deadline ? (task.deadline | date:'MMM d, y') : 'No due date' }}
+              </td>
+              <td>{{ getPmName(task.assigned_to) || 'Unassigned' }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-2"
+                        (click)="startEditTask(task)">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger"
+                        (click)="deleteTask(task.task_id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div *ngIf="tasks.length === 0 && !isLoading && !errorMessage" 
+           class="text-center py-3 text-muted">
+        No tasks found for this project
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Project Form -->
+<div class="modal-fade" id="newProjectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ editProjectData ? 'Edit Project' : 'Create New Project' }}</h3>
+    </div >
+    <div class="modal-body">
+      <form (submit)="editProjectData ? updateProject() : createProject()">
+        <div class="row">
+          <div class="col-md-8 mb-3">
+            <label class="form-label">Project Name*</label>
+            <input type="text" class="form-control" 
+                  [ngModel]="editProjectData?.name || newProject.name" 
+                  (ngModelChange)="editProjectData ? editProjectData.name = $event : newProject.name = $event"
+                  name="name" required>
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Status*</label>
+            <select class="form-select" 
+                    [ngModel]="editProjectData?.status || newProject.status"
+                    (ngModelChange)="editProjectData ? editProjectData.status = $event : newProject.status = $event"
+                    name="status" required>
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </option>
+            </select>
+          </div>
+        </div>
+  
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" rows="3"
+                    [ngModel]="editProjectData?.description || newProject.description"
+                    (ngModelChange)="editProjectData ? editProjectData.description = $event : newProject.description = $event"
+                    name="description"></textarea>
+        </div>
+  
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control"
+                  [ngModel]="editProjectData?.start_date || newProject.start_date"
+                  (ngModelChange)="editProjectData ? editProjectData.start_date = $event : newProject.start_date = $event"
+                  name="start_date">
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Deadline</label>
+            <input type="date" class="form-control"
+                  [ngModel]="editProjectData?.deadline || newProject.deadline"
+                  (ngModelChange)="editProjectData ? editProjectData.deadline = $event : newProject.deadline = $event"
+                  name="deadline">
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Project Manager</label>
+            <select class="form-select"
+                    [ngModel]="editProjectData?.pm_id || newProject.pm_id"
+                    (ngModelChange)="editProjectData ? editProjectData.pm_id = $event : newProject.pm_id = $event"
+                    name="pm_id">
+              <option [value]="null">-- Select PM --</option>
+              <option *ngFor="let pm of projectManagers" [value]="pm.id">
+                {{ pm.full_name }}
+              </option>
+            </select>
+          </div>
+        </div>
+  
+        <div class="d-flex justify-content-end">
+          <button *ngIf="editProjectData" type="button" class="btn btn-secondary me-2" 
+                  (click)="cancelEdit()" [disabled]="isLoading">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            {{ editProjectData ? 'Update Project' : 'Create Project' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
 </div>

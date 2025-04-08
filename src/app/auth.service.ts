@@ -7,20 +7,21 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  
+  private currentUser: any;
   private apiUrl = 'http://localhost:8080/login'; // URL of your backend API
 
   constructor(private http: HttpClient) {}
 
   private tokenExpirationTimer: any;
-
+  getCurrentUser() {
+    return this.currentUser;
+  }
   login(credentials: {email: string, password: string}) {
     return this.http.post<{token: string, expiresIn: number}>(
       'http://localhost:8080/login',
       credentials
     ).pipe(
       tap(res => {
-        this.setAuthTimer(res.expiresIn);
         localStorage.setItem('token', res.token);
         const expirationDate = new Date(
           new Date().getTime() + res.expiresIn * 1000
@@ -29,11 +30,7 @@ export class AuthService {
       })
     );
   }
-  private setAuthTimer(duration: number) {
-    this.tokenExpirationTimer = setTimeout(() => {
-      this.logout();
-    }, duration * 1000);
-  }
+
 
   logout() {
     localStorage.removeItem('token');
@@ -54,8 +51,5 @@ export class AuthService {
       return;
     }
 
-    const remainingTime = expirationDate.getTime() - new Date().getTime();
-    this.setAuthTimer(remainingTime / 1000);
   }
 }
-

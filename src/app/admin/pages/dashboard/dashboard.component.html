@@ -1,18 +1,82 @@
 <div class="dashboard-container">
-<app-navbar></app-navbar>
-
-<div class="main-content">
-    <app-sidebar></app-sidebar>
+    <app-navbar></app-navbar>
     
-    <div class="overview-cards">
-    <!-- Ensure you pass the inputs correctly -->
-    <app-overview-cards 
-        [totalUsers]="totalUsers" 
-        [totalProjects]="totalProjects" 
-        [totalTasks]="totalTasks" 
-        [activeUsers]="activeUsers">
-    </app-overview-cards>
+    <div class="main-content">
+      <div class="content-area">
+        <div class="overview-cards">
+          <app-overview-cards 
+            [totalProjects]="totalProjectsCount" 
+            [totalUsers]="totalUsersCount"
+            [completedProjects]="completedProjectsCount"
+            [pendingTasks]="inProgressTasksCount"
+            [overdueTasks]="overdueTasksCount">
+        </app-overview-cards>
+        </div>
+        
+        <div class="reports-section">
+          <!-- Project Completion Progress -->
+          <div class="progress-card">
+            <h3>Project Completion Progress</h3>
+            <div class="progress-wrapper">
+              <div class="progress-bar" 
+                   [style.width.%]="getOverallCompletionPercentage()">
+                <span>{{ getOverallCompletionPercentage() }}%</span>
+              </div>
+            </div>
+            <div class="progress-metrics">
+              <div class="metric">
+                <span class="value">{{ activeProjectsCount }}</span>
+                <span class="label">Active</span>
+              </div>
+              <div class="metric">
+                <span class="value">{{ behindScheduleProjectsCount }}</span>
+                <span class="label">Behind Schedule</span>
+              </div>
+              <div class="metric">
+                <span class="value">{{completedProjectsCount  }}</span>
+                <span class="label">Completed</span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Team Performance Widget -->
+          <div class="team-performance-card">
+            <h3>Team Performance Overview</h3>
+            <div class="chart-container">
+              <canvas #statusChart></canvas>
+            </div>
+            <div class="team-stats">
+              <div class="stat">
+                <span class="value">{{ managedTeamsCount }}</span>
+                <span class="label">Teams Managed</span>
+              </div>
+              <div class="stat">
+                <span class="value">{{ totalTeamMembers }}</span>
+                <span class="label">Team Members</span>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Recent Projects Section -->
+        <div class="recent-projects" *ngIf="recentProjects.length > 0">
+          <h3>Recent Projects</h3>
+          <div class="project-list">
+            <div class="project-item" *ngFor="let project of recentProjects" [ngClass]="getStatusClass(project.status)">
+              <div class="project-header">
+                <h4>{{ project.name }}</h4>
+                <span class="status-badge">
+                  {{ project.status }}
+                  <fa-icon [icon]="getStatusIcon(project.status)"></fa-icon>
+                </span>
+              </div>
+              <p class="project-description">{{ project.description }}</p>
+              <div class="project-meta">
+                <span><fa-icon [icon]="faCalendarDay"></fa-icon> Due: {{ project.deadline | date }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-</div>
-</div>
+  </div>

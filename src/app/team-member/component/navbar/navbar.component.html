@@ -1,0 +1,20 @@
+<div class="navbar">
+  <div class="navbar-right">
+    <span class="user-info">
+      Welcome <i class="fa fa-user"></i>
+    </span>
+    
+    
+      <nav class="navbar-links">
+        <a [routerLink]="['/team-dashboard']"><i class="fa fa-tachometer"></i> Dashboard</a>
+        <a [routerLink]="['/my-tasks']"><i class="fa fa-tasks"></i> My Tasks</a>
+        <a [routerLink]="['/my-teams']"><i class="fa fa-check-circle"></i> My Teams</a>
+      </nav>
+    </div>
+    <div class="back-button-container">
+      <button class="btn-back" (click)="goBack()">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        Logout
+      </button>
+    </div>
+  </div>

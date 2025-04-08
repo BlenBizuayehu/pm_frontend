@@ -6,9 +6,11 @@ import { ReportsComponent } from './admin/pages/reports/reports.component';
 import { TasksComponent } from './admin/pages/tasks/tasks.component';
 import { UsersComponent } from './admin/pages/users/users.component';
 import { LoginComponent } from './login/login.component'; // Import your login component
-import { PmDashboardComponent } from './pm-dashboard/pm-dashboard.component'; // PM dashboard
-import { TeamDashboardComponent } from './team-dashboard/team-dashboard.component'; // Team dashboard
-
+import { PmDashboardComponent } from './pm/pages/dashboard/dashboard.component'; // PM dashboard
+import { TeamsComponent } from './pm/pages/teams/teams.component';
+import { TeamDashboardComponent } from './team-member/pages/dashboard/dashboard.component'; // Team dashboard
+import { MyTasksComponent } from './team-member/pages/my-tasks/my-tasks.component';
+import { MyTeamsComponent } from './team-member/pages/my-teams/my-teams.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -19,6 +21,9 @@ export const routes: Routes = [
   { path: 'projects', component: ProjectsComponent },
   { path: 'tasks', component: TasksComponent },
   { path: 'reports', component: ReportsComponent },
+  { path: 'teams',  component: TeamsComponent},
+  { path: 'my-teams', component: MyTeamsComponent},
+  { path: 'my-tasks', component: MyTasksComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 
