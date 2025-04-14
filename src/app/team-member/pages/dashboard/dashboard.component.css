@@ -1,6 +1,7 @@
 /* Main Structure (matches your existing dashboard) */
 .dashboard-container {
   position: relative;
+  top:40px;
   min-height: 100vh;
 }
 

@@ -162,6 +162,7 @@
     </div>
   </div>
 
+  
 
   <!-- Tasks Table -->
   <div class="card table-card">
@@ -180,7 +181,6 @@
               <tr>
                 <th>Title</th>
                 <th>Status</th>
-                <th>Priority</th>
                 <th>Project</th>
                 <th>Assigned To</th>
                 <th>Deadline</th>
@@ -200,11 +200,7 @@
                     {{ task.status }}
                   </span>
                 </td>
-                <td>
-                  <span class="badge" >
-                    {{ task.priority }}
-                  </span>
-                </td>
+                
                 <td>{{ getProjectName(task.project_id) }}</td>
                 <td>{{ getUserName(task.assigned_to) }}</td>
                 <td>{{ formatDate(task.deadline) }}</td>
@@ -240,12 +236,7 @@
               {{ selectedTask?.status }}
             </span>
           </div>
-          <div class="meta-item">
-            <span class="meta-label"><i class="fas fa-flag"></i> Priority:</span>
-            <span class="priority-badge" [ngClass]="'priority-' + selectedTask?.priority.toLowerCase()">
-              {{ selectedTask?.priority }}
-            </span>
-          </div>
+          
           <div class="meta-item">
             <span class="meta-label"><i class="fas fa-project-diagram"></i> Project:</span>
             <span>{{ getProjectName(selectedTask?.project_id) || 'Unassigned' }}</span>
@@ -266,7 +257,44 @@
           <h5><i class="fas fa-align-left"></i> Description</h5>
           <p>{{ selectedTask?.description || 'No description provided' }}</p>
         </div>
+
+
       </div>
+
+      <div class="task-documents" *ngIf="selectedTask">
+        <h5><i class="fas fa-file-alt"></i> Attached Documents</h5>
+        
+        <div *ngIf="documentLoading" class="loading-documents">
+          <i class="fas fa-spinner fa-spin"></i> Loading documents...
+        </div>
+      
+        <div *ngIf="!documentLoading && taskDocuments.length === 0" class="no-documents">
+          No documents attached to this task
+        </div>
+      
+        <div *ngIf="!documentLoading && taskDocuments.length > 0" class="document-list">
+          <div class="document-item" *ngFor="let doc of taskDocuments">
+            <div class="document-info">
+              <i class="fas"
+   [ngClass]="{
+     'fa-file-pdf': doc?.type === 'application/pdf',
+     'fa-file-word': doc?.type === 'application/msword',
+     'fa-file-excel': doc?.type === 'application/vnd.ms-excel',
+     'fa-file-image': doc?.type?.startsWith('image/'),
+     'fa-file': true
+   }"></i>
+
+              <span class="document-name">{{ getFileType(doc.document_path) }}</span>
+            </div>
+            <div class="document-actions">
+             
+              <button class="btn btn-sm btn-outline-success" (click)="downloadDocument(doc)">
+                <i class="fas fa-download"></i> Download
+              </button>
+            </div>
+          </div>
+        </div>
+
       <div class="modal-footer">
         <button class="btn btn-edit" (click)="startEdit(selectedTask); selectedTask = null">
           <i class="fas fa-edit"></i> Edit Task
@@ -275,6 +303,9 @@
           <i class="fas fa-times"></i> Close
         </button>
       </div>
-    </div>
+      </div>
+ 
+
   </div>
+  
 </div>

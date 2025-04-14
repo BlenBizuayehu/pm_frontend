@@ -1,0 +1,51 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h3>Task Documents</h3>
+    </div>
+    <div class="card-body">
+      <div *ngIf="isLoading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <table *ngIf="!isLoading" class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Task ID</th>
+            <th>Task Title</th>
+            <th>Assigned To</th>
+            <th>Last Upload</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of documents">
+            <td>{{ doc.task_id }}</td>
+            <td>{{ doc.task_title }}</td>
+            <td>{{ doc.assigned_to }}</td>
+            <td>{{ doc.formattedDate }}</td>
+            <td>
+              <button class="btn btn-sm btn-primary me-2" 
+                      (click)="viewDocument(doc.task_id)">
+                View
+              </button>
+              <button class="btn btn-sm btn-success" 
+                      (click)="downloadDocument(doc.task_id)">
+                Download
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="documents.length === 0">
+            <td colspan="5" class="text-center">No documents found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

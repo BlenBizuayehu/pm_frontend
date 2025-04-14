@@ -1,11 +1,11 @@
 import { CommonModule, Location } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowLeft,
-  faCalendarAlt, faCog,
+  faCalendarAlt,
+  faCog,
   faEdit,
   faEnvelope,
   faExclamationCircle,
@@ -23,22 +23,23 @@ import {
   faUserPlus,
   faUserShield,
   faUserTag,
-  faUserTie, faUsers,
-  faUsersCog
+  faUserTie,
+  faUsers,
+  faUsersCog,
 } from '@fortawesome/free-solid-svg-icons';
+import { UserService } from '../../../services/users.service'; // Import UserService
 
 @Component({
   selector: 'app-users',
   standalone: true,
   imports: [CommonModule, FontAwesomeModule, FormsModule],
   templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css']
+  styleUrls: ['./users.component.css'],
 })
-
 export class UsersComponent implements OnInit {
-
   errorMessage = '';
   successMessage = '';
+  
   // FontAwesome icons
   faArrowLeft = faArrowLeft;
   faUsersCog = faUsersCog;
@@ -64,7 +65,6 @@ export class UsersComponent implements OnInit {
   faSignature = faSignature;
   faLock = faLock;
 
-  private apiUrl = 'http://localhost:8080/api';
   users: any[] = [];
   filteredUsers: any[] = [];
   currentUser: any = { full_name: '', email: '', password: '', role: 'Team Member' };
@@ -80,7 +80,7 @@ export class UsersComponent implements OnInit {
   roles = ['Admin', 'Project Manager', 'Team Member'];
   isLoading = false;
 
-  constructor(private location: Location, private http: HttpClient) {}
+  constructor(private location: Location, private userService: UserService) {} // Use UserService
 
   ngOnInit() {
     this.loadUsers();
@@ -88,49 +88,40 @@ export class UsersComponent implements OnInit {
 
   showError(message: string) {
     this.errorMessage = message;
-    setTimeout(() => this.errorMessage = '', 5000);
+    setTimeout(() => (this.errorMessage = ''), 5000);
   }
 
   showSuccess(message: string) {
     this.successMessage = message;
-    setTimeout(() => this.successMessage = '', 5000);
+    setTimeout(() => (this.successMessage = ''), 5000);
   }
 
   goBack() {
     this.location.back();
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   loadUsers() {
     this.isLoading = true;
-    this.http.get<any[]>(`${this.apiUrl}/users`, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: (data) => {
-          this.users = data;
-          this.filteredUsers = [...this.users];
-          this.updateStats();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading users:', error);
-          this.errorMessage = 'Failed to load users';
-          this.isLoading = false;
-        }
-      });
+    this.userService.getAllUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        this.filteredUsers = [...this.users];
+        this.updateStats();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading users:', error);
+        this.errorMessage = 'Failed to load users';
+        this.isLoading = false;
+      },
+    });
   }
 
   updateStats() {
     this.totalUsers = this.users.length;
-    this.adminCount = this.users.filter(u => u.role === 'Admin').length;
-    this.managerCount = this.users.filter(u => u.role === 'Project Manager').length;
-    this.memberCount = this.users.filter(u => u.role === 'Team Member').length;
+    this.adminCount = this.users.filter((u) => u.role === 'Admin').length;
+    this.managerCount = this.users.filter((u) => u.role === 'Project Manager').length;
+    this.memberCount = this.users.filter((u) => u.role === 'Team Member').length;
   }
 
   openAddUserModal() {
@@ -158,11 +149,9 @@ export class UsersComponent implements OnInit {
 
   deleteUser(userId: number) {
     this.isLoading = true;
-    this.http.delete(`${this.apiUrl}/users/${userId}`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    this.userService.deleteUser(userId).subscribe({
       next: () => {
-        this.users = this.users.filter(u => u.user_id !== userId);
+        this.users = this.users.filter((u) => u.user_id !== userId);
         this.filterUsers();
         this.updateStats();
         this.isLoading = false;
@@ -171,7 +160,7 @@ export class UsersComponent implements OnInit {
         console.error('Delete error:', error);
         this.errorMessage = 'Delete failed';
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -184,17 +173,16 @@ export class UsersComponent implements OnInit {
   }
 
   createUser() {
-    this.http.post(`${this.apiUrl}/users`, this.currentUser, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: () => {
-          this.loadUsers();
-          this.showModal = false;
-        },
-        error: (error) => {
-          console.error('Create error:', error);
-          this.errorMessage = 'Failed to create user';
-        }
-      });
+    this.userService.createUser(this.currentUser).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.showModal = false;
+      },
+      error: (error) => {
+        console.error('Create error:', error);
+        this.errorMessage = 'Failed to create user';
+      },
+    });
   }
 
   updateUser() {
@@ -204,9 +192,7 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    this.http.put(`${this.apiUrl}/users/${userId}`, this.currentUser, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    this.userService.updateUser(userId, this.currentUser).subscribe({
       next: () => {
         this.loadUsers();
         this.showModal = false;
@@ -215,16 +201,17 @@ export class UsersComponent implements OnInit {
       error: (error) => {
         console.error('Update error:', error);
         this.errorMessage = 'Failed to update user';
-      }
+      },
     });
   }
 
   filterUsers() {
     const query = this.searchQuery.toLowerCase();
-    this.filteredUsers = this.users.filter(user =>
-      user.full_name?.toLowerCase().includes(query) ||
-      user.email?.toLowerCase().includes(query) ||
-      user.role?.toLowerCase().includes(query)
+    this.filteredUsers = this.users.filter(
+      (user) =>
+        user.full_name?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query) ||
+        user.role?.toLowerCase().includes(query)
     );
   }
 
@@ -240,5 +227,3 @@ export class UsersComponent implements OnInit {
     }
   }
 }
-
-

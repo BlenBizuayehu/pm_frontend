@@ -59,7 +59,7 @@ faListCheck=faListCheck;
 @Input() completedProjects: number = 0;
 @Input() pendingTasks: number = 0;
 @Input() overdueTasks: number = 0;
-
+@Input() toDoTasks:number=0;
 @Input() teamsCount: number = 0;   
 
 

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faBan,
@@ -22,7 +22,6 @@ import {
   faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { Chart, registerables } from 'chart.js';
-import { AuthService } from '../../../auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { OverviewCardsComponent } from '../../components/overview-cards/overview-cards.component';
 
@@ -36,6 +35,7 @@ Chart.register(...registerables);
     FontAwesomeModule,
     NavbarComponent,
     OverviewCardsComponent,
+    RouterModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -124,7 +124,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -200,7 +199,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
         
         // Handle unauthorized error
         if (error.status === 401) {
-          this.authService.logout();
           this.router.navigate(['/login']);
         }
       }
@@ -461,7 +459,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     this.errorMessage = `Error loading data: ${err.statusText || 'Unknown error'}`;
     
     if (err.status === 401) {
-      this.authService.logout();
       this.router.navigate(['/login']);
     }
   }

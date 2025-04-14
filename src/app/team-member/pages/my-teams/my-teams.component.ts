@@ -22,7 +22,6 @@ import {
   faUserShield,
   faUserTie
 } from '@fortawesome/free-solid-svg-icons';
-import { AuthService } from '../../../auth.service';
 
 @Component({
   selector: 'app-my-teams',
@@ -74,7 +73,6 @@ faArrowLeft=faArrowLeft;
   constructor(
     private location: Location,
     private http: HttpClient,
-    private authService: AuthService,
     private router: Router
   ) {}
 

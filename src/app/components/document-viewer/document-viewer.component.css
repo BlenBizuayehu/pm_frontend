@@ -1,0 +1,52 @@
+.document-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+  }
+  .document-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .btn-view {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-download {
+    background: #198754;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-view:disabled, .btn-download:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .upload-status {
+    margin: 1rem 0;
+  }
+  .upload-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .upload-progress progress {
+    flex-grow: 1;
+  }
+  .upload-success {
+    color: #198754;
+  }
+  .upload-error, .error-message {
+    color: #dc3545;
+  }
+  .no-document {
+    color: #6c757d;
+    font-style: italic;
+  }

@@ -1,6 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -11,8 +10,11 @@ import {
   faCheckCircle,
   faClipboardCheck,
   faClipboardList,
+  faDownload,
   faEdit,
   faExclamationTriangle,
+  faEye,
+  faFile,
   faFlag,
   faHeading,
   faListOl,
@@ -27,25 +29,33 @@ import {
   faTrashAlt,
   faUserTag
 } from '@fortawesome/free-solid-svg-icons';
-
+import { DocumentViewerComponent } from '../../../components/document-viewer/document-viewer.component';
+import { DocumentService } from '../../../services/document-service.service';
+import { TasksService } from '../../../services/task.service'; // Import the service
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [CommonModule, FontAwesomeModule, FormsModule],
+  imports: [CommonModule, FontAwesomeModule, FormsModule, DocumentViewerComponent],
   templateUrl: './tasks.component.html',
-  styleUrls: ['./tasks.component.css']
+  styleUrls: ['./tasks.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
+
+
 export class TasksComponent implements OnInit {
-  // FontAwesome icons
+documentPaths: {[taskId: number]: string | null} = {};  // FontAwesome icons
   faArrowLeft = faArrowLeft;
+  faEye=faEye;
+  faDownload=faDownload;
   faTasks = faTasks;
   faListOl = faListOl;
   faCheckCircle = faCheckCircle;
-  faClipboardList=faClipboardList;
+  faClipboardList = faClipboardList;
   faSpinner = faSpinner;
   faExclamationTriangle = faExclamationTriangle;
   faPlusCircle = faPlusCircle;
   faSearch = faSearch;
+  faFile=faFile;
   faEdit = faEdit;
   faTrashAlt = faTrashAlt;
   faHeading = faHeading;
@@ -60,13 +70,13 @@ export class TasksComponent implements OnInit {
   faTimes = faTimes;
   faSave = faSave;
 
-  private apiUrl = 'http://localhost:8080/api';
   tasks: any[] = [];
   filteredTasks: any[] = [];
   projects: any[] = [];
   users: any[] = [];
   selectedTask: any = null;
   showTaskForm = false;
+  tasksWithDocuments: any[] = [];
   
   // Task metrics
   totalTasks = 0;
@@ -91,8 +101,16 @@ export class TasksComponent implements OnInit {
   errorMessage = '';
   searchQuery = '';
 
+  // Add to your component class
+  taskDocuments: any[] = [];
+  documentLoading = false;
+  selectedFile: File | null = null;
+  uploading = false;
+  uploadProgress = 0;
+
   constructor(
-    private http: HttpClient,
+    private documentService: DocumentService,
+    private taskService: TasksService, // Inject the service
     private location: Location
   ) {}
 
@@ -102,14 +120,11 @@ export class TasksComponent implements OnInit {
     this.loadTasks();
   }
 
-  viewTaskDetails(task: any) {
-    this.selectedTask = task;
-  }
+  
+ 
 
   loadProjects() {
-    this.http.get<any[]>(`${this.apiUrl}/projects`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    this.taskService.getProjects().subscribe({
       next: (data) => {
         this.projects = data;
       },
@@ -121,9 +136,7 @@ export class TasksComponent implements OnInit {
   }
 
   loadUsers() {
-    this.http.get<any[]>(`${this.apiUrl}/users`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    this.taskService.getUsers().subscribe({
       next: (data) => {
         this.users = data;
       },
@@ -134,16 +147,32 @@ export class TasksComponent implements OnInit {
     });
   }
 
+
+// Add to your component
+
+
+// Or for direct download:
+
+getFileType(filename: string): string {
+  if (!filename) return 'Unknown';
+  const ext = filename.split('.').pop()?.toLowerCase();
+  switch(ext) {
+    case 'pdf': return 'PDF Document';
+    case 'doc': case 'docx': return 'Word Document';
+    case 'xls': case 'xlsx': return 'Excel Document';
+    default: return ext ? ext.toUpperCase() + ' File' : 'Document';
+  }
+}
+
   loadTasks() {
     this.isLoading = true;
-    this.http.get<any[]>(`${this.apiUrl}/tasks`, { 
-      headers: this.getAuthHeaders() 
-    }).subscribe({
+    this.taskService.getTasks().subscribe({
       next: (data) => {
         this.tasks = data;
         this.filteredTasks = [...data];
         this.updateTaskStats();
         this.isLoading = false;
+        
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
@@ -162,7 +191,6 @@ export class TasksComponent implements OnInit {
 
   createTask() {
     this.isLoading = true;
-
     const formattedDeadline = this.newTask.deadline ? 
       new Date(this.newTask.deadline).toISOString().split('T')[0] : 
       null;
@@ -174,9 +202,7 @@ export class TasksComponent implements OnInit {
       assigned_to: this.newTask.assigned_to ? Number(this.newTask.assigned_to) : null
     };
     
-    this.http.post(`${this.apiUrl}/tasks`, payload, { 
-      headers: this.getAuthHeaders() 
-    }).subscribe({
+    this.taskService.createTask(payload).subscribe({
       next: () => {
         this.loadTasks();
         this.resetNewTaskForm();
@@ -217,21 +243,18 @@ export class TasksComponent implements OnInit {
   
     delete payload.task_id;
   
-    this.http.put(`${this.apiUrl}/tasks/${this.editTaskData.task_id}`, 
-      payload, { 
-        headers: this.getAuthHeaders() 
-      }).subscribe({
-        next: () => {
-          this.loadTasks();
-          this.cancelEdit();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error updating task:', error);
-          this.errorMessage = error.error?.message || 'Failed to update task';
-          this.isLoading = false;
-        }
-      });
+    this.taskService.updateTask(this.editTaskData.task_id, payload).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.cancelEdit();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error updating task:', error);
+        this.errorMessage = error.error?.message || 'Failed to update task';
+        this.isLoading = false;
+      }
+    });
   }
   
   deleteTask(taskId: number) {
@@ -247,11 +270,8 @@ export class TasksComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
   
-      this.http.delete(`${this.apiUrl}/tasks/${taskId}`, { 
-        headers: this.getAuthHeaders(),
-        observe: 'response'
-      }).subscribe({
-        next: (response) => {
+      this.taskService.deleteTask(taskId).subscribe({
+        next: () => {
           this.tasks = this.tasks.filter(t => t.task_id !== taskId);
           this.filteredTasks = this.filteredTasks.filter(t => t.task_id !== taskId);
           this.updateTaskStats();
@@ -283,6 +303,7 @@ export class TasksComponent implements OnInit {
     }
   }
   
+  // All other methods remain exactly the same
   cancelEdit() {
     this.editTaskData = null;
     this.showTaskForm = false;
@@ -298,14 +319,6 @@ export class TasksComponent implements OnInit {
       project_id: null,
       assigned_to: null
     };
-  }
-
-  private getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
   }
 
   getProjectName(projectId: number): string {
@@ -361,4 +374,142 @@ export class TasksComponent implements OnInit {
   goBack() {
     this.location.back();
   }
+
+  loadDocumentPaths() {
+    this.tasks.forEach(task => {
+      if (task.task_id) {
+        this.taskService.getDocumentPath(task.task_id).subscribe({
+          next: (docInfo) => {
+            if (docInfo?.exists) {
+              task.documentPath = docInfo.path;
+              task.hasDocument = true;
+            } else {
+              task.hasDocument = false;
+            }
+          },
+          error: (err) => {
+            console.error('Error loading document path:', err);
+            task.hasDocument = false;
+          }
+        });
+      }
+    });
+  }
+
+  // In your component class
+documentStatus: any = {}; // Object to store document statuses
+
+checkDocumentStatus(taskId: number) {
+  this.taskService.getDocumentInfo(taskId).subscribe({
+    next: (result) => {
+      this.documentStatus[taskId] = {
+        exists: result.exists,
+        path: result.path,
+        error: result.error,
+        loading: false
+      };
+    },
+    error: (err) => {
+      this.documentStatus[taskId] = {
+        exists: false,
+        path: null,
+        error: err.message,
+        loading: false
+      };
+    }
+  });
 }
+
+// Call this for each task when loading
+loadDocumentStatuses() {
+  this.tasks.forEach(task => {
+    if (task.task_id) {
+      this.documentStatus[task.task_id] = { loading: true };
+      this.checkDocumentStatus(task.task_id);
+    }
+  });
+}
+
+loadTaskDocuments(taskId: number): void {
+  console.log('Loading documents for task:', taskId); // Debug
+  this.documentLoading = true;
+  this.taskDocuments = [];
+  
+  this.taskService.getTaskDocuments(taskId).subscribe({
+    next: (docs) => {
+      console.log('Received documents:', docs); // Debug
+      this.taskDocuments = docs || [];
+      this.documentLoading = false;
+      console.log('Documents loaded:', docs);
+    },
+    error: (err) => {
+      console.error('Error loading documents:', err);
+      this.taskDocuments = [];
+      this.documentLoading = false;
+    },
+    complete: () => {
+      console.log('Document load complete'); // Debug
+    }
+  });
+}
+
+taskDocument: any = null;
+documentError: string | null = null;
+
+
+loadDocumentInfo(taskId: number): void {
+  this.documentLoading = true;
+  this.documentError = null;
+  this.taskDocument = null;
+
+  this.taskService.getDocumentInfo(taskId).subscribe({
+    next: (docInfo) => {
+      this.taskDocument = docInfo;
+      this.documentLoading = false;
+    },
+    error: (err) => {
+      this.documentError = err.message;
+      this.documentLoading = false;
+    }
+  });
+}
+
+viewTaskDetails(task: any): void {
+  this.selectedTask = task;
+  this.loadTaskDocuments(task.task_id);
+}
+
+formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+onFileSelected(event: any): void {
+  this.selectedFile = event.target.files[0];
+}
+
+
+downloadDocument(doc: any): void {
+  if (!doc?.download_url || !doc?.document_path) {
+    console.error('Missing required document properties');
+    return;
+  }
+
+  this.taskService.getTaskDocument(doc.download_url).subscribe({
+    next: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.document_path.split('/').pop() || `document-${Date.now()}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error('Error downloading document:', err);
+      this.errorMessage = 'Failed to download document. Please try again.';
+    }
+  });
+}}

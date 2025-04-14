@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faBan,
@@ -34,7 +34,8 @@ Chart.register(...registerables);
     FontAwesomeModule,
     NavbarComponent,
     OverviewCardsComponent,
-    ProjectStatsChartComponent
+    ProjectStatsChartComponent,
+    RouterModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']

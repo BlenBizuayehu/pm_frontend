@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faBan,
@@ -17,11 +17,10 @@ import {
   faSpinner,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
-import { AuthService } from '../../../auth.service'; // Adjust path as needed
+import { TasksService } from '../../../services/task.service';
 import { TaskStatusChartComponent } from '../../component/charts/charts.component';
 import { NavbarComponent } from '../../component/navbar/navbar.component';
 import { OverviewCardsComponent } from '../../component/overview-cards/overview-cards.component';
-
 @Component({
   selector: 'app-team-dashboard',
   standalone: true,
@@ -30,7 +29,8 @@ import { OverviewCardsComponent } from '../../component/overview-cards/overview-
     FontAwesomeModule,
     NavbarComponent,
     OverviewCardsComponent,
-    TaskStatusChartComponent 
+    TaskStatusChartComponent,
+    RouterModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -67,9 +67,10 @@ export class TeamDashboardComponent implements OnInit {
   username = '';
   private apiUrl = 'http://localhost:8080/api';
 
+  private tasksService = inject(TasksService);
+
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -77,16 +78,13 @@ export class TeamDashboardComponent implements OnInit {
     this.debugInfo['init_start'] = new Date();
     this.username = localStorage.getItem('currentUser') || '';
     this.debugInfo['username_from_storage'] = this.username;
-
     if (!this.username) {
       this.router.navigate(['/login']);
       return;
     }
-
     this.loadTasks();
   }
 
- 
   loadTasks() {
     this.debugInfo['load_start'] = new Date();
     const url = `http://localhost:8080/api/user-tasks?username=${this.username}`;
@@ -119,7 +117,6 @@ export class TeamDashboardComponent implements OnInit {
         this.router.navigate(['/login']);
   
         if (err.status === 401) {
-          this.authService.logout();
         }
       }
     });
@@ -134,12 +131,11 @@ export class TeamDashboardComponent implements OnInit {
       this.totalTasksCount = 0;
       return;
     }
-  
     this.totalTasksCount = this.tasks.length;
     this.todoTasksCount = this.tasks.filter(t => t.status === 'To Do').length;
     this.inProgressTasksCount = this.tasks.filter(t => t.status === 'In Progress').length;
     this.completedTasksCount = this.tasks.filter(t => t.status === 'Done').length;
-    this.overdueTasksCount = this.tasks.filter(t => this.isOverdue(t.deadline)).length;
+    this.overdueTasksCount = this.tasks.filter(t => this.isOverdue(t.deadline) && t.status!='Done').length;
   }
 
   isOverdue(deadline: string): boolean {
@@ -149,7 +145,6 @@ export class TeamDashboardComponent implements OnInit {
     return deadlineDate < today;
   }
 
-  
   updateDashboardMetrics() {
     // Update the metrics used in your dashboard
     this.assignedTasksCount = this.tasks.length;
@@ -158,30 +153,10 @@ export class TeamDashboardComponent implements OnInit {
     ).length;
   }
 
-  private isTaskOverdue(task: any): boolean {
-    // Skip completed tasks
-    if (task.status === 'Done') return false;
-    
-    // Check if task has a due date
-    if (!task.dueDate) return false;
-    
-    // Create date objects for comparison
-    const dueDate = new Date(task.dueDate);
-    const today = new Date();
-    
-    // Reset time portions for accurate date-only comparison
-    today.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0);
-    
-    return dueDate < today;
-  }
-  
-
   getCompletionPercentage(): number {
     if (this.totalTasksCount === 0) return 0; // Prevent division by zero
     return Math.round((this.completedTasksCount / this.totalTasksCount) * 100);
   }
-  
 
   getStatusIcon(status: string): any {
     switch(status) {

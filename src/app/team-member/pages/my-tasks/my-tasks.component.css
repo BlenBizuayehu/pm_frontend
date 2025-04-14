@@ -301,3 +301,129 @@
       margin-top: 1rem;
     }
   }
+
+  /* Add these to your existing CSS */
+.task-dates {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.task-dates span {
+  padding: 2px 5px;
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.document-upload {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.document-upload label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.document-upload input[type="file"] {
+  display: none;
+}
+
+.upload-progress {
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+
+.upload-progress progress {
+  width: 100%;
+}
+
+.upload-error {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.document-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.document-link:hover {
+  text-decoration: underline;
+}
+
+.detail-row {
+  margin-bottom: 10px;
+}
+
+.detail-label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.detail-value {
+  word-break: break-word;
+}
+
+.document-upload-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.document-upload-section h3 {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 500;
+}
+
+.btn-upload {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-upload:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.progress-container {
+  width: 100%;
+  margin-top: 10px;
+}
+
+progress {
+  width: 100%;
+}
